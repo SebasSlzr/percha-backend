@@ -1,0 +1,27 @@
+services:
+  db:
+    image: mongo:8
+    container_name: percha-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - percha-mongo-data:/data/db
+
+  api:
+    build: .
+    container_name: percha-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - MONGO_URI=mongodb://db:27017/percha
+      - JWT_SECRET=cambia_esto_por_un_secreto_largo_y_random
+      - PORT=4000
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+
+volumes:
+  percha-mongo-data:
