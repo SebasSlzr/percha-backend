@@ -10,6 +10,10 @@ async function register(req, res) {
       return res.status(400).json({ message: 'Nombre, email y contraseña son obligatorios' });
     }
 
+    if (password.length > 72) {
+      return res.status(400).json({ message: 'La contraseña no puede superar 72 caracteres' });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'Ya existe una cuenta con ese email' });
