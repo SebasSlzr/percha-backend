@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+function serialize(user) {
+  return { id: user._id, name: user.name, email: user.email, role: user.role };
+}
+
 async function register(req, res) {
   try {
     const { name, email, password } = req.body;
@@ -24,7 +28,7 @@ async function register(req, res) {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.status(201).json({ token, user: serialize(user) });
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
@@ -46,16 +50,17 @@ async function login(req, res) {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ token, user: serialize(user) });
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 }
 
-// Ruta protegida — demuestra que el token realmente funciona
+// Ruta protegida: demuestra que el token funciona
 async function me(req, res) {
-  const user = await User.findById(req.userId).select('-password');
-  res.json({ user });
+  const user = await User.findById(req.userId);
+  if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+  res.json({ user: serialize(user) });
 }
 
 module.exports = { register, login, me };

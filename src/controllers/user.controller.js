@@ -4,7 +4,7 @@ const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
 
 function serialize(user) {
-  return { id: user._id, name: user.name, email: user.email };
+  return { id: user._id, name: user.name, email: user.email, role: user.role };
 }
 
 // GET /api/users/me
