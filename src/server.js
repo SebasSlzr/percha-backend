@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const garmentRoutes = require('./routes/garment.routes');
 const outfitRoutes = require('./routes/outfit.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/garments', garmentRoutes);
 app.use('/api/outfits', outfitRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
