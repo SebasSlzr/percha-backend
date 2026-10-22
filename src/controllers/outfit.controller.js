@@ -3,7 +3,16 @@ const Garment = require('../models/Garment');
 
 function serializeGarment(g) {
   if (!g) return null;
-  return { id: g._id, name: g.name, category: g.category, color: g.color, swatchColor: g.swatchColor };
+  return {
+    id: g._id,
+    name: g.name,
+    category: g.category,
+    color: g.color,
+    swatchColor: g.swatchColor,
+    imageUrl: g.imageUrl ?? null,
+    imagePublicId: g.imagePublicId ?? null,
+    isFavorite: !!g.isFavorite,
+  };
 }
 
 function serialize(outfit) {
