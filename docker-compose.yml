@@ -1,6 +1,6 @@
 services:
   db:
-    image: mongo:8
+    image: mongo:8.0
     container_name: percha-db
     restart: unless-stopped
     ports:
@@ -14,6 +14,8 @@ services:
     restart: unless-stopped
     ports:
       - "4000:4000"
+    env_file:
+      - .env
     environment:
       - MONGO_URI=mongodb://db:27017/percha
       - JWT_SECRET=cambia_esto_por_un_secreto_largo_y_random
