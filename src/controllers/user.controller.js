@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
+const { deleteUserImages } = require('../config/cloudinary');
 
 function serialize(user) {
   return { id: user._id, name: user.name, email: user.email, role: user.role };
@@ -52,6 +53,7 @@ async function updateMe(req, res) {
 // DELETE /api/users/me — borra la cuenta y todo lo que le pertenece
 async function deleteMe(req, res) {
   try {
+    await deleteUserImages(req.userId);   // nueva línea
     await Garment.deleteMany({ owner: req.userId });
     await Outfit.deleteMany({ owner: req.userId });
     await User.findByIdAndDelete(req.userId);

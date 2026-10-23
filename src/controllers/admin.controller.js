@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
+const { deleteUserImages } = require('../config/cloudinary');
 
 // Convierte [{ _id: idDelDueño, count }] en un mapa idDelDueño -> count.
 function toCountMap(rows) {
@@ -51,7 +52,7 @@ async function remove(req, res) {
     if (user.role === 'admin') {
       return res.status(403).json({ message: 'No se puede eliminar a un administrador' });
     }
-
+    await deleteUserImages(id);  // nueva línea
     await Garment.deleteMany({ owner: id });
     await Outfit.deleteMany({ owner: id });
     await User.findByIdAndDelete(id);
