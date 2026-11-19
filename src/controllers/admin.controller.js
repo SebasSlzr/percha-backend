@@ -3,6 +3,9 @@ const User = require('../models/User');
 const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
 const { deleteUserImages } = require('../config/cloudinary');
+const WishlistItem = require('../models/WishlistItem');
+const { serialize: serializeGarment } = require('./garment.controller');
+const { serialize: serializeOutfit } = require('./outfit.controller');
 
 // Convierte [{ _id: idDelDueño, count }] en un mapa idDelDueño -> count.
 function toCountMap(rows) {
@@ -55,12 +58,45 @@ async function remove(req, res) {
     await deleteUserImages(id);  // nueva línea
     await Garment.deleteMany({ owner: id });
     await Outfit.deleteMany({ owner: id });
-    await User.findByIdAndDelete(id);
-
+    await WishlistItem.deleteMany({ owner: id });   
+    await User.findByIdAndDelete(id);      
     res.json({ message: 'Usuario eliminado' });
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 }
 
-module.exports = { list, remove };
+// GET /api/admin/users/:id/wardrobe — prendas y outfits de un usuario, en solo lectura.
+// Solo administradores (el router ya aplica requireAuth y requireAdmin).
+async function wardrobe(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    const [garments, outfits] = await Promise.all([
+      Garment.find({ owner: id }).sort({ createdAt: -1 }),
+      Outfit.find({ owner: id }).sort({ createdAt: -1 }).populate('head torso legs feet'),
+    ]);
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        wishlistReminders: user.wishlistReminders ?? true,
+        garmentCount: garments.length,
+        outfitCount: outfits.length,
+      },
+      garments: garments.map(serializeGarment),
+      outfits: outfits.map(serializeOutfit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+  }
+}
+
+module.exports = { list, remove, wardrobe  };
