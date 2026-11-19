@@ -12,6 +12,7 @@ function serializeGarment(g) {
     imageUrl: g.imageUrl ?? null,
     imagePublicId: g.imagePublicId ?? null,
     isFavorite: !!g.isFavorite,
+    dominantColor: g.dominantColor ?? null
   };
 }
 
@@ -123,4 +124,4 @@ async function remove(req, res) {
   }
 }
 
-module.exports = { list, create, update, remove };
+module.exports = { list, create, update, remove, serialize };

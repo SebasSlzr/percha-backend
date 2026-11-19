@@ -14,7 +14,7 @@ const garmentSchema = new mongoose.Schema(
     // Solo se guarda la URL pública de Cloudinary, nunca el archivo.
     imageUrl: { type: String, default: null },
     imagePublicId: { type: String, default: null },
-    isFavorite: { type: Boolean, default: false },
+    isFavorite: { type: Boolean, default: false }, dominantColor: { type: String, default: null }, // lo calcula el servidor a partir de la foto
   },
   { timestamps: true }
 );
