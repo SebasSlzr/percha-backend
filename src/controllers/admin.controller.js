@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
 const { deleteUserImages } = require('../config/cloudinary');
+const WishlistItem = require('../models/WishlistItem');
 
 // Convierte [{ _id: idDelDueño, count }] en un mapa idDelDueño -> count.
 function toCountMap(rows) {
@@ -55,8 +56,8 @@ async function remove(req, res) {
     await deleteUserImages(id);  // nueva línea
     await Garment.deleteMany({ owner: id });
     await Outfit.deleteMany({ owner: id });
-    await User.findByIdAndDelete(id);
-
+    await WishlistItem.deleteMany({ owner: id });   
+    await User.findByIdAndDelete(id);      
     res.json({ message: 'Usuario eliminado' });
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });

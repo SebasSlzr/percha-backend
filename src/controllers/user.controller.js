@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Garment = require('../models/Garment');
 const Outfit = require('../models/Outfit');
 const { deleteUserImages } = require('../config/cloudinary');
+const WishlistItem = require('../models/WishlistItem');
 
 function serialize(user) {
   return { id: user._id, name: user.name, email: user.email, role: user.role };
@@ -56,6 +57,7 @@ async function deleteMe(req, res) {
     await deleteUserImages(req.userId);   // nueva línea
     await Garment.deleteMany({ owner: req.userId });
     await Outfit.deleteMany({ owner: req.userId });
+    await WishlistItem.deleteMany({ owner: req.userId });
     await User.findByIdAndDelete(req.userId);
     res.json({ message: 'Cuenta eliminada' });
   } catch (error) {
