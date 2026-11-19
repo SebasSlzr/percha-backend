@@ -6,7 +6,13 @@ const { deleteUserImages } = require('../config/cloudinary');
 const WishlistItem = require('../models/WishlistItem');
 
 function serialize(user) {
-  return { id: user._id, name: user.name, email: user.email, role: user.role };
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    wishlistReminders: user.wishlistReminders ?? true,
+  };
 }
 
 // GET /api/users/me
@@ -19,7 +25,7 @@ async function getMe(req, res) {
 // PUT /api/users/me — solo actualiza lo que venga en el body
 async function updateMe(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, wishlistReminders } = req.body;
     const updates = {};
 
     if (name !== undefined) {
@@ -38,6 +44,13 @@ async function updateMe(req, res) {
       if (password.length < 8) return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres' });
       if (password.length > 72) return res.status(400).json({ message: 'La contraseña no puede superar 72 caracteres' });
       updates.password = await bcrypt.hash(password, 10);
+    }
+
+        if (wishlistReminders !== undefined) {
+      if (typeof wishlistReminders !== 'boolean') {
+        return res.status(400).json({ message: 'wishlistReminders debe ser verdadero o falso' });
+      }
+      updates.wishlistReminders = wishlistReminders;
     }
 
     if (Object.keys(updates).length === 0) {

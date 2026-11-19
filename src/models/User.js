@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema(
     // El rol nunca llega desde el registro: todos entran como 'user'.
     // Las cuentas ya existentes lo reciben por el valor por defecto.
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    wishlistReminders: { type: Boolean, default: true }, // ¿recibe recordatorios push de la wishlist?
+    pushToken: { type: String, default: null },           // token de Expo del teléfono; nunca se envía a la app
   },
   { timestamps: true }
 );
