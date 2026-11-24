@@ -32,6 +32,11 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 4000;
 
-connectDB().then(() => {
-  app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+  })
+  .catch((error) => {
+    console.error('❌ No se pudo conectar a MongoDB:', error.message);
+    process.exit(1);
+  });
