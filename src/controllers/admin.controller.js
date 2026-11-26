@@ -6,6 +6,7 @@ const { deleteUserImages } = require('../config/cloudinary');
 const WishlistItem = require('../models/WishlistItem');
 const { serialize: serializeGarment } = require('./garment.controller');
 const { serialize: serializeOutfit } = require('./outfit.controller');
+const { runWishlistReminders } = require('../jobs/wishlistReminders');
 
 // Convierte [{ _id: idDelDueño, count }] en un mapa idDelDueño -> count.
 function toCountMap(rows) {
@@ -99,4 +100,10 @@ async function wardrobe(req, res) {
   }
 }
 
-module.exports = { list, remove, wardrobe  };
+// POST /api/admin/reminders/run: ejecuta el job ya, con las mismas reglas.
+async function runReminders(req, res) {
+  const sent = await runWishlistReminders();
+  res.json({ sent });
+}
+
+module.exports = { list, remove, wardrobe, runReminders };
