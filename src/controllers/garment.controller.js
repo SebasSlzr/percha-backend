@@ -3,6 +3,7 @@ const Garment = require('../models/Garment');
 const { validateImage, deleteImage } = require('../config/cloudinary');
 const { detectDominantColor } = require('../utils/dominantColor');
 const { colorName } = require('../utils/colorName');
+const { queueBackgroundRemoval } = require('../utils/removeBackground');
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 const FALLBACK_SWATCH = '#B8B2A7'; // si no se pudo detectar el color; la usuaria lo corrige
@@ -73,6 +74,7 @@ async function create(req, res) {
       imagePublicId: imagePublicId || null,
       dominantColor,
     });
+    queueBackgroundRemoval(garment);
     res.status(201).json({ garment: serialize(garment) });
   } catch (error) {
     serverError(res, error);
@@ -99,7 +101,9 @@ async function update(req, res) {
     if (swatchColor !== undefined) updates.swatchColor = swatchColor;
 
     // La imagen se cambia (o se quita con null) siempre con url e identificador juntos.
-    const imageChanged = imageUrl !== undefined || imagePublicId !== undefined;
+    const sentImage = imageUrl !== undefined || imagePublicId !== undefined;
+    const sameImage = imageUrl === garment.imageUrl && imagePublicId === garment.imagePublicId;
+    const imageChanged = sentImage && !sameImage;
     if (imageChanged) {
       const imageError = validateImage({ imageUrl, imagePublicId }, req.userId);
       if (imageError) return res.status(400).json({ message: imageError });
@@ -129,7 +133,7 @@ async function update(req, res) {
     if (imageChanged && previousPublicId && previousPublicId !== garment.imagePublicId) {
       await deleteImage(previousPublicId);
     }
-
+    if (imageChanged && garment.imagePublicId) queueBackgroundRemoval(garment);
     res.json({ garment: serialize(garment) });
   } catch (error) {
     serverError(res, error);
