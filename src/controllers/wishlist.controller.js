@@ -7,6 +7,7 @@ const { detectDominantColor } = require('../utils/dominantColor');
 const { colorName } = require('../utils/colorName');
 const { fetchHtml, extractPreview, LinkError } = require('../utils/linkPreview');
 const { serialize: serializeGarment } = require('./garment.controller');
+const { queueBackgroundRemoval } = require('../utils/removeBackground');
 
 const FALLBACK_SWATCH = '#B8B2A7';
 const MAX_PRICE = 100000000;
@@ -228,6 +229,7 @@ async function moveToWardrobe(req, res) {
       dominantColor,
     });
     await item.deleteOne();
+    queueBackgroundRemoval(garment);
 
     res.status(201).json({ garment: serializeGarment(garment) });
   } catch (error) {
