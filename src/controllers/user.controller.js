@@ -78,4 +78,25 @@ async function deleteMe(req, res) {
   }
 }
 
-module.exports = { getMe, updateMe, deleteMe };
+// PUT /api/users/me/push-token  { token: "ExponentPushToken[...]" | null }
+// Un teléfono por cuenta: si ese token estaba en otra cuenta (otra persona inició
+// sesión en el mismo teléfono), se le quita a esa cuenta. Con null se borra (cierre de sesión).
+const PUSH_TOKEN = /^Expo(nent)?PushToken\[[^\]]+\]$/;
+
+async function savePushToken(req, res) {
+  try {
+    const { token } = req.body;
+    if (token !== null && (typeof token !== 'string' || !PUSH_TOKEN.test(token))) {
+      return res.status(400).json({ message: 'Token de notificaciones no válido' });
+    }
+    if (token) {
+      await User.updateMany({ pushToken: token, _id: { $ne: req.userId } }, { pushToken: null });
+    }
+    await User.updateOne({ _id: req.userId }, { pushToken: token });
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+  }
+}
+
+module.exports = { getMe, updateMe, deleteMe, savePushToken };
