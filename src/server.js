@@ -9,6 +9,7 @@ const outfitRoutes = require('./routes/outfit.routes');
 const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const wishlistRoutes = require('./routes/wishlist.routes');
+const { startWishlistReminders } = require('./jobs/wishlistReminders');
 
 const app = express();
 
@@ -35,8 +36,10 @@ const PORT = process.env.PORT || 4000;
 connectDB()
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+    startWishlistReminders();
   })
   .catch((error) => {
     console.error('❌ No se pudo conectar a MongoDB:', error.message);
     process.exit(1);
   });
+  
